@@ -3,8 +3,59 @@
 ## Copyright (C) 2012 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@whonix.org>
 ## See the file COPYING for copying conditions.
 
+## colors() sets a full terminfo palette -- the BashFAQ/037 set -- and this
+## help text uses only bold, under and reset. The rest are deliberately
+## available rather than dead, so they are flagged file-wide rather than
+## deleted; trimming the palette is not this pass's business.
+# shellcheck disable=SC2034
+## 'A && { ... } 2>/dev/null ||:' is the idiom that makes the whole palette
+## optional: shellcheck reads it as a mistaken if-then-else, but C running when
+## A is true is exactly what is wanted here -- ':' swallows any tput failure.
+# shellcheck disable=SC2015
+
+set -o errexit
+set -o nounset
+set -o pipefail
+set -o errtrace
+shopt -s inherit_errexit
+shopt -s shift_verbose
+
+## colors() returns early on an unset or empty TERM, and every one of these is
+## then read by the help text below. Empty is what they expanded to before
+## strict mode -- the text simply prints without escape sequences, which is the
+## point of the early return.
+alt=""
+ealt=""
+hide=""
+show=""
+save=""
+load=""
+bold=""
+stout=""
+estout=""
+under=""
+eunder=""
+reset=""
+blink=""
+italic=""
+eitalic=""
+red=""
+green=""
+yellow=""
+blue=""
+magenta=""
+cyan=""
+white=""
+default=""
+eed=""
+eel=""
+ebl=""
+ewl=""
+draw=""
+back=""
+
 colors() {
-   if [ "$TERM" = "" ]; then
+   if [ "${TERM:-}" = "" ]; then
       return 0
    fi
 
@@ -27,7 +78,7 @@ colors() {
       blink=$(    tput blink  || tput mb      ) # Start blinking
       italic=$(   tput sitm   || tput ZH      ) # Start italic
       eitalic=$(  tput ritm   || tput ZR      ) # End   italic
-      [[ $TERM != *-m ]] && {
+      [[ ${TERM} != *-m ]] && {
       red=$(      tput setaf 1|| tput AF 1    )
       green=$(    tput setaf 2|| tput AF 2    )
       yellow=$(   tput setaf 3|| tput AF 3    )
@@ -40,7 +91,7 @@ colors() {
       eed=$(      tput ed     || tput cd      )   # Erase to end of display
       eel=$(      tput el     || tput ce      )   # Erase to end of line
       ebl=$(      tput el1    || tput cb      )   # Erase to beginning of line
-      ewl=$eel$ebl                                # Erase whole line
+      ewl=${eel}${ebl}                                # Erase whole line
       draw=$(     tput -S <<< '   enacs
                                       smacs
                                       acsc
@@ -55,7 +106,7 @@ colors
 
 if [ -f /usr/share/anon-gw-base-files/gateway ]; then
 
-   echo "\
+   printf '%s\n' "\
 ${bold}Documentation can be found on Whonix homepage.
 https://www.whonix.org
 
@@ -150,7 +201,7 @@ ${bold}End of Whonix help.${reset}
 
 elif [ -f /usr/share/anon-ws-base-files/workstation ]; then
 
-   echo "\
+   printf '%s\n' "\
 ${bold}Documentation can be found on Whonix homepage.
 https://www.whonix.org
 
